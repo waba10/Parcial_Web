@@ -1,9 +1,14 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const TaskController= require('../controllers/taskcontrollers');
+
+router.post('/', TaskController.store);
+router.get('/tareas', TaskController.getTareas);
+router.get('/buscar/:id', TaskController.buscar);
+router.delete('/delete/:id', TaskController.delete);
+router.put('/actualizar/:id',TaskController.update);
+
+
 
 module.exports = router;

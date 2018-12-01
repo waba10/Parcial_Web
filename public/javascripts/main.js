@@ -1,108 +1,113 @@
 tareas();
 
-document.querySelector("#fTareas").addEventListener('submit',function(e){
+document.querySelector('#fTareas').addEventListener('submit', function (e) {
     e.preventDefault();
-    let url= '/users';
-    let data={
-        tarea: document.forms["#fTareas"]['tarea'].value,
-        fecha: document.forms["#fTareas"]['fecha'].value
+    var url = '/api';
+    var data = {
+        nombre: document.forms["fTareas"]['nombre'].value,
+        familia: document.forms["fTareas"]['familia'].value,
+        descubrimiento: document.forms["fTareas"]['descubrimiento'].value
     };
 
-    fetch(url,{
+    fetch(url, {
         method: 'POST',
         body: JSON.stringify(data),
-        headers:{
+        headers:
+        {
             'Content-Type': 'application/json'
         }
-    }).then(res=> res.json())
-        .catch(err=> console.log("Error", err))
-        .then(function(response){
+    }).then(res => res.json())
+        .catch(error => console.log("Error:", error))
+        .then(function (response) {
+
             tareas();
         })
 });
 
 
-document.querySelector("#formU").addEventListener('submit',function(e){
+document.querySelector("#formU").addEventListener('submit', function (e) {
     e.preventDefault();
-    let url= '/users/actualizar/'+document.forms["#formU"]['id'].value;
-    let data={
-        tarea: document.forms["#formU"]['tarea'].value,
-        fecha: document.forms["#formU"]['fecha'].value
+    let url = '/api/Bestiario/' + document.forms["formU"]['idTarea'].value;
+    var data = {
+        nombre: document.forms["formU"]['nombre'].value,
+        familia: document.forms["formU"]['familia'].value,
+        descubrimiento: document.forms["formU"]['descubrimiento'].value,
     };
-
-    fetch(url,{
-        method: 'PUT',
+    fetch(url, {
+        method: "PUT",
         body: JSON.stringify(data),
-        headers:{
+        headers:
+        {
             'Content-Type': 'application/json'
         }
-    }).then(res=> res.json())
-        .catch(err=> console.log("Error", err))
-        .then(function(response){
+    }).then(res => res.json())
+        .catch(error => console.log("Error:", error))
+        .then(function (response) {
+            console.log("actualizado con exito");
             tareas();
         })
 });
 
-function tareas(){
-    let tableTareas=document.querySelector("#llenar");
-    let contenido="";
-
-    fetch('/users/tareas')
-    .then(function(response){
-        return response.text();
-    })
-    .then(function(data){
-        JSON.parse(data).tareas.forEach(element=>{
-            contenido= contenido + `<tr>
-            <td>${element.tarea}</td>
-            <td>${element.fecha}</td>
-            <td>
-                <a href="/users/delete/${element.id}" class="eliminar btn btn-danger"> Eliminar </a>
-                <a href="/users/actualizar/${element.id}" class="actualizar btn btn-warning" data-toogle="modal" data-target="#exampleModal > Actualizar </a>
-                            
-            </td>
-
-            </tr>`
+function tareas() {
+    let tableTareas = document.querySelector("#llenar");
+    let contenido = "";
+    fetch('/api/Bestiario')
+        .then(function (response) {
+            return response.text();
         })
-        tableTareas.innerHTML=contenido;
+        .then(function (data) {
+            console.log(data);
+            JSON.parse(data).tareas.forEach(element => {
+                contenido = contenido + `<tr>
+                <td>${element._id}</td>
+                <td>${element.nombre}</td>
+                <td>${element.familia}</td>
+                <td>${element.descubrimiento}</td>
+                <td>
+                    <a href="/api/Bestiario/${element._id}" class="eliminar btn btn-danger">Eliminar</a>
+                    <a href="/api/Bestiario/${element._id}" class="actualizar btn btn-warning" data-toggle="modal" data-target="#exampleModal">Actualizar</a>
+                </td>
+                <tr/>`
+            });
+            tableTareas.innerHTML = contenido;
+            let btns_eliminar = document.querySelectorAll('.eliminar');
+            btns_eliminar.forEach(item => {
+                item.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    let url = this['href'];
+                    console.log(url);
+                    fetch(url, {
+                        method: "DELETE",
+                    }).then(res => res.json())
+                        .catch(error => console.log("Error:", error))
+                        .then(function (response) {
+                            console.log("sucess");
+                            tareas();
+                        })
 
-        let btns_eliminar= document.querySelectorAll('.eliminar');
-
-        btns_eliminar.forEach(item=>{
-            item.addEventListener("click", function(e){
-                e.preventDefault();
-                let url=this['href'];
-
-                fetch(url,{
-                    method:"DELETE"
-                })
-                .then(res=> res.json())
-                
-                .then(function(response){
-                    tareas();
-                })
+                });
             })
+            let btns_actualizar = document.querySelectorAll('.actualizar');
+
+            btns_actualizar.forEach(item => {
+                item.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    let url = this['href'];
+                    console.log(url);
+                    fetch(url, { method: "GET" })
+                        .then(function (response) {
+                            return response.text();
+                        })
+                        .then(function (data) {
+                            console.log(JSON.parse(data).tarea);
+                            let formUpdate = document.querySelector('#formU');
+                            formU.idTarea.value = JSON.parse(data)._id;
+                            formU.nombre.value = JSON.parse(data).nombre;
+                            formU.familia.value = JSON.parse(data).familia;
+                            formU.descubrimiento.value=JSON.parse(data).descubrimiento;
+                        });
+                });
+            });
+
         });
-
-        btns_actualizar('.actualizar');
-
-        btns:actualizar.forEach(item=>{
-            item.addEventListener("click", function(e){
-                e.preventDefault();
-                let url= this['href'];
-                fetch(url,{
-                    method: 'GET'
-                })
-                .then(function(response){
-                    return response.text();
-                })
-                .then(function(data){
-                    let formUpdate=document.querySelector("#formU");
-                    formUpdate.idTarea.value=JSON.parse(data)._id;
-                    formUpdate.tarea.value=JSON.parse(data).tarea;
-                })
-            })
-        });
-
-    })
 }
